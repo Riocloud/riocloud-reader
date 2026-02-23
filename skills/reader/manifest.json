@@ -1,0 +1,18 @@
+{
+  "name": "riocloud-reader",
+  "description": "Universal content reader - fetch from Twitter, Reddit, YouTube, WeChat, and more",
+  "trigger": {
+    "any": [
+      "https://twitter.com",
+      "https://x.com",
+      "https://reddit.com",
+      "https://www.reddit.com",
+      "https://youtube.com",
+      "https://youtu.be",
+      "https://mp.weixin.qq.com",
+      "https://xiaohongshu.com",
+      "https://bilibili.com"
+    ]
+  },
+  "version": "1.0.0"
+}
