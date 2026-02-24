@@ -36,7 +36,7 @@ all = [
     "trafilatura>=1.6.0",
     "youtube-transcript-api>=0.6.0",
     "telethon>=1.34.0",
-    "notebooklm>=0.0.1",
+    "notebooklm-py>=0.1.0",
 ]
 browser = [
     "playwright>=1.40.0",
@@ -48,7 +48,7 @@ telegram = [
     "telethon>=1.34.0",
 ]
 notebooklm = [
-    "notebooklm>=0.0.1",
+    "notebooklm-py>=0.1.0",
 ]
 generic = [
     "trafilatura>=1.6.0",

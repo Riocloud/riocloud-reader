@@ -9,6 +9,7 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 from .base import BaseParser, ParseResult, is_reddit_url
 
