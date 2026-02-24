@@ -18,6 +18,15 @@ from riocloud_reader import Reader
 from riocloud_reader.schema import UnifiedInbox
 
 
+# Allowed directories for file operations
+SAFE_DIRS = [
+    os.path.expanduser("~"),
+    os.path.abspath("."),
+    os.path.abspath("./output"),
+    "/tmp",  # Allow for testing
+]
+
+
 def normalize_url(url: str) -> str:
     """Normalize URL: add https:// if missing scheme.
     
@@ -40,6 +49,44 @@ def normalize_url(url: str) -> str:
     return url
 
 
+def validate_safe_path(path: str, param_name: str) -> str:
+    """Validate that a path is safe to write to.
+    
+    Prevents path traversal attacks by restricting writes to safe directories.
+    
+    Args:
+        path: The path to validate
+        param_name: Name of the parameter (for error messages)
+    
+    Returns:
+        The validated absolute path
+    
+    Raises:
+        ValueError: If path is outside allowed directories
+    """
+    abs_path = os.path.abspath(path)
+    
+    # Check if path is within any safe directory
+    is_safe = False
+    for safe_dir in SAFE_DIRS:
+        safe_abs = os.path.abspath(safe_dir)
+        if abs_path.startswith(safe_abs + os.sep) or abs_path == safe_abs:
+            is_safe = True
+            break
+    
+    if not is_safe:
+        raise ValueError(
+            f"Invalid {param_name}: path must be within {SAFE_DIRS}, got: {path}"
+        )
+    
+    # Ensure parent directory exists
+    parent = os.path.dirname(abs_path)
+    if not os.path.exists(parent):
+        os.makedirs(parent, exist_ok=True)
+    
+    return abs_path
+
+
 def save_to_obsidian(content, vault_path: str) -> str:
     """Save content to Obsidian vault.
     
@@ -47,6 +94,8 @@ def save_to_obsidian(content, vault_path: str) -> str:
     """
     from datetime import datetime
     
+    # Validate vault path
+    vault_path = validate_safe_path(vault_path, "obsidian vault path")
     vault = Path(vault_path)
     if not vault.exists():
         vault.mkdir(parents=True, exist_ok=True)
@@ -119,7 +168,9 @@ def main():
     # Handle inbox
     inbox = None
     if args.inbox or args.list:
+        # Validate inbox path
         inbox_path = args.inbox or "inbox.json"
+        inbox_path = validate_safe_path(inbox_path, "inbox path")
         inbox = UnifiedInbox(inbox_path)
         
         if args.list:
@@ -148,7 +199,9 @@ def main():
             
             # Save to file if requested
             if args.output:
-                output_dir = Path(args.output)
+                # Validate output path
+                output_dir = validate_safe_path(args.output, "output directory")
+                output_dir = Path(output_dir)
                 output_dir.mkdir(parents=True, exist_ok=True)
                 
                 filename = f"{content.id}_{content.source_type.value}.md"
