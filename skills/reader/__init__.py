@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+#
+# BSD 2-Clause License
+# Copyright (c) 2026 Riocloud
+#
 # Riocloud Reader Skill for OpenClaw
 # 
 # Usage:

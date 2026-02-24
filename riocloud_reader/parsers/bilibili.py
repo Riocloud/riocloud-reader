@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+#
+# BSD 2-Clause License
+# Copyright (c) 2026 Riocloud
+#
 """
 Bilibili Parser — B站视频解析
 """

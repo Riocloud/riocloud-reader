@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+#
+# BSD 2-Clause License
+# Copyright (c) 2026 Riocloud
+#
 """
 WeChat Parser —微信公众号文章抓取
 Two-tier fallback: Jina Reader → Playwright

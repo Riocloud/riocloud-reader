@@ -7,7 +7,7 @@ name = "riocloud-reader"
 version = "1.0.0"
 description = "Universal content reader - fetch from Twitter, Reddit, YouTube, WeChat, and more"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "BSD-2-Clause"}
 authors = [
     {name = "Riocloud", email = "hi@riocloud.io"}
 ]
@@ -15,7 +15,7 @@ keywords = ["reader", "scraper", "twitter", "reddit", "youtube", "wechat", "xiao
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

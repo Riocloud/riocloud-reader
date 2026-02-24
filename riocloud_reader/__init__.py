@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+#
+# BSD 2-Clause License
+# Copyright (c) 2026 Riocloud
+#
 """
 Riocloud Reader — Universal Content Reader
 Combines x-reader and DeepReader
