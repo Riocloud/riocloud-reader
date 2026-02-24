@@ -1,7 +1,5 @@
 # Riocloud Reader
 
-![PyPI](https://img.shields.io/pypi/v/riocloud-reader)
-![Python](https://img.shields.io/pypi/pyversions/riocloud-reader)
 ![License](https://img.shields.io/github/license/Riocloud/riocloud-reader)
 
 Universal content reader for AI agents. Fetch, transcribe, and digest content from 30+ platforms in seconds.
