@@ -125,10 +125,14 @@ class YouTubeParser(BaseParser):
         # Tier 2: Groq Whisper API
         groq_key = os.getenv("GROQ_API_KEY")
         if groq_key:
-            logger.info("No YouTube transcript, trying Groq Whisper API...")
-            transcript_text = await self._fetch_via_whisper(video_id, groq_key)
-            if transcript_text:
-                return transcript_text, "en (Whisper)"
+            # Validate API key format (should start with gsk_)
+            if not groq_key.startswith("gsk_"):
+                logger.warning("Invalid GROQ_API_KEY format (should start with gsk_)")
+            else:
+                logger.info("No YouTube transcript, trying Groq Whisper API...")
+                transcript_text = await self._fetch_via_whisper(video_id, groq_key)
+                if transcript_text:
+                    return transcript_text, "en (Whisper)"
         
         # Tier 3: No transcript
         return "", ""
