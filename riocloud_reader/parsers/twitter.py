@@ -4,9 +4,15 @@
 # Copyright (c) 2026 Riocloud
 #
 """
-Twitter/X Parser — combines FxTwitter (primary) with Nitter fallback.
+Twitter/X Parser — combines FxTwitter (primary) with Nitter and Playwright fallback.
+
+Three-tier fallback:
+1. FxTwitter API (primary)
+2. Nitter HTML scraping
+3. Playwright with session (if available)
 """
 
+import asyncio
 import json
 import logging
 import os
@@ -15,6 +21,7 @@ import re
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 from urllib.parse import urlparse
 
 from .base import BaseParser, ParseResult, is_twitter_url
@@ -29,12 +36,17 @@ _NITTER_INSTANCES = [
     "https://nitter.kavin.rocks",
 ]
 
+# Session directory for Twitter
+SESSION_DIR = Path.home() / ".riocloud-reader" / "sessions"
+
 
 class TwitterParser(BaseParser):
     """Parse Twitter/X tweets and profiles.
     
-    Primary: FxTwitter API (structured JSON)
-    Fallback: Nitter HTML scraping
+    Three-tier fallback:
+    1. FxTwitter API (primary)
+    2. Nitter HTML scraping
+    3. Playwright with session (if available)
     """
     
     name = "twitter"
@@ -62,7 +74,13 @@ class TwitterParser(BaseParser):
         
         # Fallback to Nitter
         logger.warning(f"FxTwitter failed, trying Nitter: {result.error}")
-        return await self._parse_nitter(url, f"{username}/status/{tweet_id}")
+        result = await self._parse_nitter(url, f"{username}/status/{tweet_id}")
+        if result.success:
+            return result
+        
+        # Fallback to Playwright with session
+        logger.warning("Nitter failed, trying Playwright with session")
+        return await self._parse_via_browser(url)
     
     def _extract_tweet_info(self, url: str) -> tuple[str, str] | None:
         """Extract (username, tweet_id) from URL."""
@@ -230,3 +248,134 @@ Source: {url}
                 continue
         
         return ParseResult.failure(url, "All parsers failed")
+    
+    async def _parse_via_browser(self, url: str) -> ParseResult:
+        """Third-tier fallback: parse via Playwright with session.
+        
+        Requires Twitter session file at ~/.riocloud-reader/sessions/twitter.json
+        Run: riocloud-reader login twitter
+        """
+        session_path = SESSION_DIR / "twitter.json"
+        
+        if not session_path.exists():
+            return ParseResult.failure(
+                url,
+                "Twitter session not found. Run: riocloud-reader login twitter"
+            )
+        
+        try:
+            from playwright.async_api import async_playwright
+        except ImportError:
+            return ParseResult.failure(url, "Playwright not installed")
+        
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+                storage_state=str(session_path)
+            )
+            page = await context.new_page()
+            
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            await page.wait_for_timeout(2000)
+            
+            # X-specific selectors for tweet content
+            data = await page.evaluate("""() => {
+                const article = document.querySelector('article[role="article"]');
+                if (!article) return null;
+                
+                // Get text content
+                const textEl = article.querySelector('[data-testid="tweetText"]');
+                const text = textEl ? textEl.innerText : '';
+                
+                // Get author
+                const authorEl = article.querySelector('[data-testid="User-Name"]');
+                const author = authorEl ? authorEl.innerText.split('\\n')[0] : '';
+                
+                return { text, author };
+            }""")
+            
+            await browser.close()
+            
+            if data and data.get("text"):
+                return ParseResult(
+                    url=url,
+                    title=f"Tweet by {data.get('author', 'unknown')}",
+                    content=data.get("text", ""),
+                    author=data.get("author", ""),
+                    tags=["twitter", "playwright"],
+                )
+            
+            return ParseResult.failure(url, "Failed to extract tweet via Playwright")
+
+
+async def login_twitter(headless: bool = False):
+    """Login to Twitter and save session.
+    
+    Usage:
+        riocloud-reader --login twitter
+        riocloud-reader --login twitter --headless
+    """
+    import time
+    
+    SESSION_DIR.mkdir(parents=True, exist_ok=True)
+    session_path = SESSION_DIR / "twitter.json"
+    
+    try:
+        from playwright.async_api import async_playwright
+    except ImportError:
+        print("Playwright not installed. Run: pip install playwright")
+        return
+    
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=headless)
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        )
+        page = await context.new_page()
+        
+        await page.goto("https://twitter.com/home", wait_until="domcontentloaded")
+        
+        if headless:
+            # Headless: save QR screenshot for scanning
+            qr_path = SESSION_DIR / "twitter_qr.png"
+            await page.wait_for_timeout(3000)
+            await page.screenshot(path=str(qr_path))
+            print(f"QR screenshot saved to: {qr_path}")
+            print("Open this image and scan the QR code with your phone.")
+            
+            # Poll for cookie change (login detection)
+            initial_cookies = len(await context.cookies())
+            timeout = 300  # 5 min
+            start = time.time()
+            logged_in = False
+            
+            while time.time() - start < timeout:
+                await asyncio.sleep(3)
+                current_cookies = len(await context.cookies())
+                if current_cookies > initial_cookies + 2:
+                    logger.info(f"Cookie count changed: {initial_cookies} -> {current_cookies}")
+                    await asyncio.sleep(2)  # Wait for cookies to settle
+                    logged_in = True
+                    break
+            
+            if not logged_in:
+                print("Login timed out. No session saved.")
+                await browser.close()
+                return
+        else:
+            # Visible: let user log in manually
+            print("Please log in manually in the browser...")
+            print("After logging in, close the browser or press Enter here...")
+            try:
+                await page.wait_for_event("close", timeout=300000)
+            except KeyboardInterrupt:
+                pass
+        
+        # Save session with restrictive permissions
+        await context.storage_state(path=str(session_path))
+        import os
+        os.chmod(str(session_path), 0o600)
+        print(f"Session saved to {session_path}")
+        
+        await browser.close()

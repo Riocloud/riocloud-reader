@@ -8,6 +8,7 @@ Xiaohongshu Parser — 小红书笔记抓取
 Three-tier: Jina → Playwright + session → error
 """
 
+import asyncio
 import logging
 from pathlib import Path
 
@@ -28,7 +29,15 @@ class XHSParser(BaseParser):
         return is_xhs_url(url)
     
     async def parse(self, url: str) -> ParseResult:
-        """Parse a Xiaohongshu URL."""
+        """Parse a Xiaohongshu URL.
+        
+        Fixed: Add xsec_token warning and session expiry detection.
+        Based on x-reader: https://github.com/runesleo/x-reader/commit/36c1ae5
+        """
+        
+        # Check for xsec_token - warn if missing
+        if "xsec_token" not in url and "xiaohongshu.com/explore/" in url:
+            logger.warning("[XHS] URL missing xsec_token, likely to get 404")
         
         # Tier 1: Jina Reader
         try:
@@ -92,11 +101,16 @@ class XHSParser(BaseParser):
         }
     
     async def _fetch_via_browser(self, url: str, session_path: Path) -> dict:
-        """Fetch via Playwright with saved session."""
+        """Fetch via Playwright with saved session.
+        
+        Fixed: Use XHS-specific selectors (#detail-title, #detail-desc, .bottom-container)
+        instead of generic .content which hits comment divs.
+        Based on x-reader: https://github.com/runesleo/x-reader/commit/36c1ae5
+        """
         try:
             from playwright.async_api import async_playwright
         except ImportError:
-            raise RuntimeError("Playwright not installed")
+            raise RuntimeError("Playwright not installed. Run: pip install playwright")
         
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
@@ -107,28 +121,58 @@ class XHSParser(BaseParser):
             page = await context.new_page()
             
             await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            await page.wait_for_timeout(2000)
             
-            title = await page.title()
+            # XHS SPA needs the note container to render
+            try:
+                await page.wait_for_selector("#noteContainer", timeout=8000)
+            except Exception:
+                logger.warning("[XHS] #noteContainer not found within 8s, proceeding anyway")
+            await page.wait_for_timeout(1000)
             
-            content = await page.evaluate("""() => {
-                const el = document.querySelector('.note-content') 
-                    || document.querySelector('#detail-desc')
-                    || document.body;
-                return el ? el.innerText : '';
+            # XHS-specific selectors to avoid comment content mixing with main content
+            data = await page.evaluate("""() => {
+                const title = document.querySelector('#detail-title');
+                const desc = document.querySelector('#detail-desc');
+                const meta = document.querySelector('.bottom-container');
+                const author = document.querySelector('.author-wrapper .username')
+                    || document.querySelector('.interaction-container');
+                return {
+                    title: title ? title.innerText.trim() : '',
+                    content: [
+                        desc ? desc.innerText.trim() : '',
+                        meta ? meta.innerText.trim() : '',
+                    ].filter(Boolean).join('\\n\\n'),
+                    author: author ? author.innerText.trim().split('\\n')[0] : '',
+                };
             }""")
             
             await browser.close()
             
+            # Session expiry detection: XHS redirects to /explore or login page
+            final_url = page.url
+            if final_url != url:
+                if final_url.rstrip("/").endswith("/explore") or "login" in final_url:
+                    raise RuntimeError(
+                        f"XHS session expired (redirected to {final_url}). "
+                        "Run: riocloud-reader login xhs"
+                    )
+            
             return {
-                "title": title,
-                "content": content.strip(),
-                "author": "",
+                "title": data.get("title", ""),
+                "content": data.get("content", ""),
+                "author": data.get("author", ""),
             }
 
 
-async def login_xhs():
-    """Login to Xiaohongshu and save session."""
+async def login_xhs(headless: bool = False):
+    """Login to Xiaohongshu and save session.
+    
+    Fixed: Add headless mode with QR screenshot + cookie polling.
+    Based on x-reader: https://github.com/runesleo/x-reader/commit/36c1ae5
+    """
+    import os
+    import time
+    
     try:
         from playwright.async_api import async_playwright
     except ImportError:
@@ -139,18 +183,53 @@ async def login_xhs():
     session_path = SESSION_DIR / "xhs.json"
     
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=headless)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         )
         page = await context.new_page()
         
         await page.goto("https://www.xiaohongshu.com/explore", wait_until="domcontentloaded")
-        print("Please log in manually...")
-        print("After logging in, press Enter here...")
-        input()
         
+        if headless:
+            # Headless: save QR screenshot for scanning
+            qr_path = SESSION_DIR / "xhs_qr.png"
+            await page.wait_for_timeout(3000)
+            await page.screenshot(path=str(qr_path))
+            print(f"QR screenshot saved to: {qr_path}")
+            print("Open this image and scan the QR code with your phone.")
+            
+            # Poll for cookie change (login detection)
+            initial_cookies = len(await context.cookies())
+            timeout = 300  # 5 min
+            start = time.time()
+            logged_in = False
+            
+            while time.time() - start < timeout:
+                await asyncio.sleep(3)
+                current_cookies = len(await context.cookies())
+                if current_cookies > initial_cookies + 2:
+                    logger.info(f"Cookie count changed: {initial_cookies} -> {current_cookies}")
+                    await asyncio.sleep(2)  # Wait for cookies to settle
+                    logged_in = True
+                    break
+            
+            if not logged_in:
+                print("Login timed out. No session saved.")
+                await browser.close()
+                return
+        else:
+            # Visible: let user log in manually
+            print("Please log in manually in the browser...")
+            print("After logging in, close the browser or press Enter here...")
+            try:
+                await page.wait_for_event("close", timeout=300000)
+            except KeyboardInterrupt:
+                pass
+        
+        # Save session with restrictive permissions (contains auth tokens)
         await context.storage_state(path=str(session_path))
+        os.chmod(str(session_path), 0o600)
         print(f"Session saved to {session_path}")
         
         await browser.close()

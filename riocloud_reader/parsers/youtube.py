@@ -5,15 +5,27 @@
 #
 """
 YouTube Parser — fetches transcripts and metadata.
+
+Three-tier fallback:
+1. YouTube Transcript API
+2. Groq Whisper API (if GROQ_API_KEY set)
+3. Error message
 """
 
+import asyncio
 import logging
+import os
+import tempfile
+
 import requests
 from bs4 import BeautifulSoup
 
 from .base import BaseParser, ParseResult, is_youtube_url, extract_youtube_video_id
 
 logger = logging.getLogger("riocloud_reader.parsers.youtube")
+
+# Groq Whisper model
+GROQ_WHISPER_MODEL = "whisper-large-v3"
 
 
 class YouTubeParser(BaseParser):
@@ -98,7 +110,31 @@ class YouTubeParser(BaseParser):
             return "", "", ""
     
     async def _fetch_transcript(self, video_id: str) -> tuple:
-        """Fetch transcript for a video."""
+        """Fetch transcript for a video.
+        
+        Three-tier fallback:
+        1. YouTube Transcript API
+        2. Groq Whisper API (if GROQ_API_KEY set)
+        3. Return empty
+        """
+        # Tier 1: YouTube Transcript API
+        transcript_text, lang_code = self._fetch_youtube_transcript(video_id)
+        if transcript_text:
+            return transcript_text, lang_code
+        
+        # Tier 2: Groq Whisper API
+        groq_key = os.getenv("GROQ_API_KEY")
+        if groq_key:
+            logger.info("No YouTube transcript, trying Groq Whisper API...")
+            transcript_text = await self._fetch_via_whisper(video_id, groq_key)
+            if transcript_text:
+                return transcript_text, "en (Whisper)"
+        
+        # Tier 3: No transcript
+        return "", ""
+    
+    def _fetch_youtube_transcript(self, video_id: str) -> tuple:
+        """Fetch transcript via YouTube Transcript API."""
         try:
             from youtube_transcript_api import YouTubeTranscriptApi
             
@@ -137,6 +173,88 @@ class YouTubeParser(BaseParser):
             logger.warning(f"Transcript fetch failed: {e}")
         
         return "", ""
+    
+    async def _fetch_via_whisper(self, video_id: str, api_key: str) -> str:
+        """Transcribe audio via Groq Whisper API.
+        
+        Downloads audio via yt-dlp and sends to Groq for transcription.
+        Requires GROQ_API_KEY environment variable.
+        """
+        try:
+            import yt_dlp
+        except ImportError:
+            logger.warning("yt-dlp not installed, cannot use Whisper fallback")
+            return ""
+        
+        # Download audio to temp file
+        audio_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+                audio_path = tmp.name
+            
+            # Download audio-only (m4a is better quality)
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': audio_path,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'quiet': True,
+                'no_warnings': True,
+            }
+            
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, self._download_audio, video_id, ydl_opts)
+            
+            # Check if file exists
+            if not os.path.exists(audio_path):
+                logger.warning("Audio download failed")
+                return ""
+            
+            # Send to Groq Whisper API
+            with open(audio_path, "rb") as audio_file:
+                files = {"file": ("audio.mp3", audio_file, "audio/mpeg")}
+                headers = {"Authorization": f"Bearer {api_key}"}
+                data = {"model": GROQ_WHISPER_MODEL}
+                
+                response = requests.post(
+                    "https://api.groq.com/openai/v1/audio/transcriptions",
+                    files=files,
+                    data=data,
+                    headers=headers,
+                    timeout=120
+                )
+            
+            if response.status_code == 200:
+                result = response.json()
+                text = result.get("text", "")
+                if text:
+                    logger.info(f"Groq Whisper transcription succeeded ({len(text)} chars)")
+                    return self._format_transcript(text.split())
+                return ""
+            else:
+                logger.warning(f"Groq API error: {response.status_code} {response.text}")
+                return ""
+                
+        except Exception as e:
+            logger.warning(f"Whisper transcription failed: {e}")
+            return ""
+        finally:
+            # Cleanup temp file
+            if audio_path and os.path.exists(audio_path):
+                try:
+                    os.unlink(audio_path)
+                except:
+                    pass
+    
+    def _download_audio(self, video_id: str, ydl_opts: dict):
+        """Download audio (sync, runs in executor)."""
+        import yt_dlp
+        url = f"https://www.youtube.com/watch?v={video_id}"
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
     
     def _format_transcript(self, lines: list) -> str:
         """Format transcript into paragraphs."""

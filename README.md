@@ -18,6 +18,9 @@ Whether you need to read tweets, YouTube videos, Reddit posts, news articles, or
 - **Multiple Interfaces** - CLI tool, Python library, MCP server, and OpenClaw skill
 - **Cross-Platform** - Works on Linux, macOS, and Windows
 - **Security Hardened** - Built-in SSRF protection, path traversal prevention, secure session file permissions
+- **AI-Powered Transcription** - Groq Whisper fallback for YouTube videos without captions
+- **Direct Obsidian Sync** - Save content directly to your Obsidian vault
+- **Bare Domain Support** - Use `example.com` directly in CLI
 
 ## Why Riocloud Reader?
 
@@ -219,9 +222,74 @@ Configure in your Claude Desktop config (claude_desktop_config.json):
 |----------|--------------|-------------|
 | TG_API_ID | Telegram | API ID from my.telegram.org |
 | TG_API_HASH | Telegram | API Hash from my.telegram.org |
-| GROQ_API_KEY | Whisper | Free API key from console.groq.com |
+| GROQ_API_KEY | YouTube Whisper | Free API key from console.groq.com |
 | FIRECRAWL_API_KEY | Firecrawl | Optional, for paywalled content |
 | DEEPREEDER_MEMORY_PATH | Storage | Directory to save content |
+| OBSIDIAN_VAULT | Obsidian | Default vault path for --obsidian flag |
+| OBSIDIAN_VAULT | Obsidian | Default vault path for --obsidian flag |
+
+## Advanced Features
+
+### YouTube Groq Whisper Fallback
+
+When YouTube videos don't have captions, riocloud-reader automatically falls back to Groq Whisper API for transcription.
+
+```bash
+# Set up Groq API key
+export GROQ_API_KEY=your_groq_api_key
+
+# Now any YouTube video will be transcribed
+riocloud-reader https://youtube.com/watch?v=xxx
+```
+
+Get your free API key at: https://console.groq.com/
+
+### Bare Domain Support
+
+You can use bare domain names without https:// prefix:
+
+```bash
+riocloud-reader example.com
+riocloud-reader example.com/path
+riocloud-reader twitter.com/elonmusk/status/123456
+```
+
+### Obsidian Vault Integration
+
+Save content directly to your Obsidian vault:
+
+```bash
+# Save to Obsidian vault
+riocloud-reader https://youtube.com/watch?v=xxx --obsidian /path/to/vault
+
+# Or use environment variable
+export OBSIDIAN_VAULT=/path/to/vault
+riocloud-reader https://twitter.com/user/status/123
+```
+
+Creates date-based folder structure:
+```
+vault/
+├── 2026-02/
+│   ├── youtube/
+│   │   └── dQw4w9WgXcQ_Test Video.md
+│   └── twitter/
+│       └── abc123_Tweet by User.md
+```
+
+### Twitter Login Session
+
+For better Twitter/X coverage, log in to preserve session:
+
+```bash
+# First, log in (opens browser)
+riocloud-reader login twitter
+
+# Then use Twitter URLs - will use session if available
+riocloud-reader https://x.com/user/status/123456
+```
+
+This uses three-tier fallback: FxTwitter API → Nitter → Playwright with session
 
 ### Configuration File
 
