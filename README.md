@@ -18,6 +18,20 @@ Whether you need to read tweets, YouTube videos, Reddit posts, news articles, or
 - **Multiple Interfaces** - CLI tool, Python library, MCP server, and OpenClaw skill
 - **Cross-Platform** - Works on Linux, macOS, and Windows
 
+## Why Riocloud Reader?
+
+Riocloud Reader breaks down data barriers across major social platforms. No more expensive API fees or access restrictions — automatically fetch videos, tweets, and long-form content, translate them to clean Markdown, and sync directly to Obsidian for fully automated intelligence monitoring.
+
+- **Universal Collection** - Solved the blocking issues with WeChat and Xiaohongshu. Supports long-term Xiaohongshu collection without QR code scans. Say goodbye to 403 errors.
+
+- **Cost Effective** - No need to purchase expensive Twitter API. Free automated collection through integrated tools.
+
+- **AI-Powered Analysis** - Integrated Whisper for instant YouTube subtitle transcription. Bilibili data structured extraction.
+
+- **Real-time Sync** - Telegram intelligence feed real-time integration.
+
+- **Seamless Storage** - Heterogeneous data standardized, direct Obsidian integration to build your personal second brain.
+
 ## Supported Platforms
 
 ### Twitter/X
