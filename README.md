@@ -17,6 +17,7 @@ Whether you need to read tweets, YouTube videos, Reddit posts, news articles, or
 - **Multi-Format Output** - Returns structured data including title, content, author, timestamps, and metadata
 - **Multiple Interfaces** - CLI tool, Python library, MCP server, and OpenClaw skill
 - **Cross-Platform** - Works on Linux, macOS, and Windows
+- **Security Hardened** - Built-in SSRF protection, path traversal prevention, secure session file permissions
 
 ## Why Riocloud Reader?
 

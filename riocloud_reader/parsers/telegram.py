@@ -7,12 +7,38 @@
 Telegram Parser — channel messages via Telethon
 """
 
+import os
 import logging
 from urllib.parse import urlparse
 
 from .base import BaseParser, ParseResult
 
 logger = logging.getLogger("riocloud_reader.parsers.telegram")
+
+
+def validate_session_path(session: str) -> str:
+    """
+    Validate and secure session file path.
+    
+    Security: restrict session file to safe directories (prevent path traversal).
+    Also locks down session file permissions (contains auth tokens).
+    
+    Based on x-reader security fix: https://github.com/runesleo/x-reader/commit/733c913
+    """
+    session_abs = os.path.abspath(session)
+    safe_dirs = [os.path.expanduser("~/.riocloud-reader"), os.path.abspath(".")]
+    
+    if not any(session_abs.startswith(d) for d in safe_dirs):
+        raise ValueError(
+            f"Session path must be under ~/.riocloud-reader/ or current directory, got: {session}"
+        )
+    
+    # Lock down session file permissions (contains auth tokens)
+    session_file = session_abs + ".session"
+    if os.path.exists(session_file):
+        os.chmod(session_file, 0o600)
+    
+    return session_abs
 
 
 class TelegramParser(BaseParser):

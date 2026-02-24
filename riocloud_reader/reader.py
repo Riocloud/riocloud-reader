@@ -14,6 +14,7 @@ from typing import Optional, List
 
 from .schema import UnifiedContent, UnifiedInbox
 from .parsers import get_parser
+from .utils.url_validator import validate_url
 
 logger = logging.getLogger("riocloud_reader")
 
@@ -80,6 +81,10 @@ class Reader:
         # Ensure URL has scheme
         if not url.startswith(("http://", "https://")):
             url = f"https://{url}"
+
+        # SSRF protection: block private IPs, metadata endpoints, DNS rebinding
+        # Security fix based on x-reader: https://github.com/runesleo/x-reader/commit/733c913
+        validate_url(url)
 
         platform = self._detect_platform(url)
         logger.info(f"[{platform}] Fetching: {url[:60]}...")
