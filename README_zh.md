@@ -1,6 +1,6 @@
 # Riocloud Reader
 
-![License](https://img.shields.io/github/license/Riocloud/riocloud-reader)
+![BSD-2-Clause](https://img.shields.io/badge/License-BSD--2--Clause-blue)
 
 面向AI代理的通用内容读取器。几秒钟内从30+平台获取、转录和整理内容。
 

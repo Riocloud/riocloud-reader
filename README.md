@@ -1,6 +1,6 @@
 # Riocloud Reader
 
-![License](https://img.shields.io/github/license/Riocloud/riocloud-reader)
+![BSD-2-Clause](https://img.shields.io/badge/License-BSD--2--Clause-blue)
 
 Universal content reader for AI agents. Fetch, transcribe, and digest content from 30+ platforms in seconds.
 

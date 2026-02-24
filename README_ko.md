@@ -1,6 +1,6 @@
 # Riocloud Reader
 
-![License](https://img.shields.io/github/license/Riocloud/riocloud-reader)
+![BSD-2-Clause](https://img.shields.io/badge/License-BSD--2--Clause-blue)
 
 AI 에이전트를 위한 범용 콘텐츠 리더. 30개 이상의 플랫폼에서 몇 초 만에 콘텐츠를 가져오고, 전사하고, 정리합니다.
 
