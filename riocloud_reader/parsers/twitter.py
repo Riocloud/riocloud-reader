@@ -113,7 +113,9 @@ class TwitterParser(BaseParser):
         try:
             req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                data = json.loads(resp.read().decode())
+                # Check response size limit
+                raw_data = resp.read(self.max_response_size)
+                data = json.loads(raw_data.decode())
             
             if data.get("code") != 200:
                 return ParseResult.failure(url, f"FxTwitter error: {data.get('message')}")
@@ -130,7 +132,9 @@ class TwitterParser(BaseParser):
         try:
             req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                data = json.loads(resp.read().decode())
+                # Check response size limit
+                raw_data = resp.read(self.max_response_size)
+                data = json.loads(raw_data.decode())
             
             if data.get("code") != 200:
                 return ParseResult.failure(url, f"FxTwitter error")

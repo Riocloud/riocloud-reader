@@ -44,7 +44,13 @@ class RedditParser(BaseParser):
                 headers={"User-Agent": self.user_agent, "Accept": "application/json"}
             )
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                data = json.loads(resp.read().decode())
+                # Check response size
+                content_length = resp.headers.get('Content-Length')
+                if content_length and int(content_length) > self.max_response_size:
+                    return ParseResult.failure(url, f"Response too large ({content_length} bytes)")
+                
+                raw_data = resp.read(self.max_response_size)
+                data = json.loads(raw_data.decode())
             
             return self._build_result(url, data)
             

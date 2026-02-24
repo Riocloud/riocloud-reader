@@ -40,6 +40,8 @@ class BaseParser(ABC):
     
     name: str = "base"
     timeout: int = 30
+    max_response_size: int = 10 * 1024 * 1024  # 10MB max response size
+    max_content_length: int = 2 * 1024 * 1024  # 2MB max content length
     
     user_agent: str = (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
