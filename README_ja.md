@@ -17,6 +17,10 @@ Tweet、YouTube動画、Reddit投稿、記事、またはWeChatやBilibiliなど
 - **マルチフォーマット出力** - タイトル、コンテンツ、作者、タイムスタンプ、メタデータを含む構造化データを返す
 - **複数のインターフェース** - CLIツール、Pythonライブラリ、MCPサーバー、OpenClawスキル
 - **クロスプラットフォーム** - Linux、macOS、Windowsで動作
+- **セキュリティ強化** - SSRF保護、パストラバーサル防止、安全なセッショファイル権限を内蔵
+- **AI transcription** - 字幕のないYouTube動画のGroq Whisperフォールバック
+- **Obsidian直接連携** - コンテンツをObsidian保管庫に直接保存
+- **ベアドメインサポート** - CLIで `example.com` を直接使用
 
 ## 対応プラットフォーム
 
@@ -204,11 +208,73 @@ Claude Desktop設定で構成（claude_desktop_config.json）：
 |------|------|------|
 | TG_API_ID | Telegram | my.telegram.orgからのAPI ID |
 | TG_API_HASH | Telegram | my.telegram.orgからのAPI Hash |
-| GROQ_API_KEY | Whisper | console.groq.comからの無料APIキー |
+| GROQ_API_KEY | YouTube Whisper | console.groq.comからの無料APIキー |
 | FIRECRAWL_API_KEY | Firecrawl | オプション、有料コンテンツ用 |
 | DEEPREEDER_MEMORY_PATH | ストレージ | コンテンツを保存するディレクトリ |
+| OBSIDIAN_VAULT | Obsidian | --obsidianフラグのデフォルト保管庫パス |
 
-### 設定ファイル
+## 高度な機能
+
+### YouTube Groq Whisper フォールバック
+
+YouTube動画に字幕がない場合、riocloud-readerは自動的にGroq Whisper APIを使用してトランスクリプションを行います。
+
+```bash
+# Groq APIキーを設定
+export GROQ_API_KEY=あなたの_groq_apiキー
+
+# すべてのYouTube動画がトランスクリプションされます
+riocloud-reader https://youtube.com/watch?v=xxx
+```
+
+無料APIキーを取得：https://console.groq.com/
+
+### ベアドメインサポート
+
+https://プレフィックスなしでベアドメイン名を使用できます：
+
+```bash
+riocloud-reader example.com
+riocloud-reader example.com/パス
+riocloud-reader twitter.com/elonmusk/status/123456
+```
+
+### Obsidian保管庫連携
+
+コンテンツをObsidian保管庫に直接保存：
+
+```bash
+# Obsidian保管庫に保存
+riocloud-reader https://youtube.com/watch?v=xxx --obsidian /パス/_to/vault
+
+# または環境変数を使用
+export OBSIDIAN_VAULT=/パス/_to/vault
+riocloud-reader https://twitter.com/user/status/123
+```
+
+日付ベースのフォルダ構造を作成：
+```
+vault/
+├── 2026-02/
+│   ├── youtube/
+│   │   └── dQw4w9WgXcQ_テスト動画.md
+│   └── twitter/
+│       └── abc123_ユーザーのツイート.md
+```
+
+### Twitterログ인セッション
+
+より良いTwitter/Xカバレッジのために、セッションを維持するためにログイン：
+
+```bash
+# まず、ログイン（ブラウザを開く）
+riocloud-reader login twitter
+
+# その後Twitter URLを使用 - 利用可能な場合はセッションを使用
+riocloud-reader https://x.com/user/status/123456
+```
+
+これは3層フォールバックを使用：FxTwitter API → Nitter → Playwrightセッション
 
 `.env`ファイルを作成：
 

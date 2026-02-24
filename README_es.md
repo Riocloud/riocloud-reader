@@ -17,6 +17,10 @@ Ya sea que necesites leer tweets, videos de YouTube, publicaciones de Reddit, ar
 - **Salida multiformato** - Devuelve datos estructurados incluyendo título, contenido, autor, marcas de tiempo y metadatos
 - **Múltiples interfaces** - Herramienta CLI, biblioteca Python, servidor MCP y skill de OpenClaw
 - **Multiplataforma** - Funciona en Linux, macOS y Windows
+- **Seguridad reforzada** - Protección SSRF integrada, prevención de path traversal, permisos de archivos de sesión seguros
+- **Transcripción con IA** - Fallback de Groq Whisper para videos de YouTube sin subtítulos
+- **Integración directa con Obsidian** - Guarda contenido directamente en tu bóveda de Obsidian
+- **Soporte de dominio básico** - Usa `example.com` directamente en CLI
 
 ## Plataformas compatibles
 
@@ -204,11 +208,73 @@ Configurar en tu Claude Desktop (claude_desktop_config.json):
 |----------|----------|-------------|
 | TG_API_ID | Telegram | API ID de my.telegram.org |
 | TG_API_HASH | Telegram | API Hash de my.telegram.org |
-| GROQ_API_KEY | Whisper | Clave API gratuita de console.groq.com |
+| GROQ_API_KEY | YouTube Whisper | Clave API gratuita de console.groq.com |
 | FIRECRAWL_API_KEY | Firecrawl | Opcional, para contenido de pago |
 | DEEPREEDER_MEMORY_PATH | Almacenamiento | Directorio para guardar contenido |
+| OBSIDIAN_VAULT | Obsidian | Ruta de bóveda predeterminada para bandera --obsidian |
 
-### Archivo de configuración
+## Funciones avanzadas
+
+### Fallback de Groq Whisper para YouTube
+
+Cuando los videos de YouTube no tienen subtítulos, riocloud-reader automáticamente usa la API de Groq Whisper para transcripción.
+
+```bash
+# Configurar clave API de Groq
+export GROQ_API_KEY=tu_clave_api_groq
+
+# Ahora cualquier video de YouTube será transcrito
+riocloud-reader https://youtube.com/watch?v=xxx
+```
+
+Obtén tu clave API gratuita en: https://console.groq.com/
+
+### Soporte de dominio básico
+
+Puedes usar nombres de dominio sin el prefijo https://:
+
+```bash
+riocloud-reader example.com
+riocloud-reader example.com/ruta
+riocloud-reader twitter.com/elonmusk/status/123456
+```
+
+### Integración con bóveda de Obsidian
+
+Guarda contenido directamente en tu bóveda de Obsidian:
+
+```bash
+# Guardar en bóveda de Obsidian
+riocloud-reader https://youtube.com/watch?v=xxx --obsidian /ruta/a/boveda
+
+# O usar variable de entorno
+export OBSIDIAN_VAULT=/ruta/a/boveda
+riocloud-reader https://twitter.com/user/status/123
+```
+
+Crea estructura de carpetas basada en fecha:
+```
+boveda/
+├── 2026-02/
+│   ├── youtube/
+│   │   └── dQw4w9WgXcQ_Video_prueba.md
+│   └── twitter/
+│       └── abc123_Tweet_de_usuario.md
+```
+
+### Sesión de inicio de sesión de Twitter
+
+Para mejor cobertura de Twitter/X, inicia sesión para preservar la sesión:
+
+```bash
+# Primero, inicia sesión (abre navegador)
+riocloud-reader login twitter
+
+# Luego usa URLs de Twitter - usará sesión si está disponible
+riocloud-reader https://x.com/user/status/123456
+```
+
+Esto usa fallback de tres niveles: FxTwitter API → Nitter → Playwright con sesión
 
 Crear un archivo `.env`:
 

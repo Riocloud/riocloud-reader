@@ -17,6 +17,10 @@ Riocloud Reader — это мощный универсальный ридер к
 - **Мультиформатный вывод** — возвращает структурированные данные, включая заголовок, контент, автора, временные метки и метаданные
 - **Несколько интерфейсов** — CLI инструмент, Python библиотека, MCP сервер и OpenClaw скилл
 - **Кроссплатформенность** — работает на Linux, macOS и Windows
+- **Усиленная безопасность** — встроенная защита от SSRF, предотвращение обхода путей, безопасные разрешения файлов сессий
+- **AI транскрибация** — Groq Whisper fallback для YouTube видео без субтитров
+- **Прямая интеграция с Obsidian** — сохранение контента напрямую в ваше хранилище Obsidian
+- **Поддержка голых доменов** — используйте `example.com` напрямую в CLI
 
 ## Поддерживаемые платформы
 
@@ -204,11 +208,73 @@ python -m riocloud_reader.mcp
 |------------|-----------|----------|
 | TG_API_ID | Telegram | API ID от my.telegram.org |
 | TG_API_HASH | Telegram | API Hash от my.telegram.org |
-| GROQ_API_KEY | Whisper | Бесплатный API ключ от console.groq.com |
+| GROQ_API_KEY | YouTube Whisper | Бесплатный API ключ от console.groq.com |
 | FIRECRAWL_API_KEY | Firecrawl | Опционально, для платного контента |
 | DEEPREEDER_MEMORY_PATH | Хранилище | Директория для сохранения контента |
+| OBSIDIAN_VAULT | Obsidian | Путь к хранилищу по умолчанию для флага --obsidian |
 
-### Конфигурационный файл
+## Продвинутые функции
+
+### Groq Whisper Fallback для YouTube
+
+Когда у видео YouTube нет субтитров, riocloud-reader автоматически использует Groq Whisper API для расшифровки.
+
+```bash
+# Установите ключ Groq API
+export GROQ_API_KEY=ваш_groq_api_ключ
+
+# Теперь любое видео YouTube будет расшифровано
+riocloud-reader https://youtube.com/watch?v=xxx
+```
+
+Получите бесплатный API ключ: https://console.groq.com/
+
+### Поддержка голых доменов
+
+Вы можете использовать имена доменов без префикса https://:
+
+```bash
+riocloud-reader example.com
+riocloud-reader example.com/путь
+riocloud-reader twitter.com/elonmusk/status/123456
+```
+
+### Интеграция с хранилищем Obsidian
+
+Сохраняйте контент напрямую в хранилище Obsidian:
+
+```bash
+# Сохранить в хранилище Obsidian
+riocloud-reader https://youtube.com/watch?v=xxx --obsidian /путь/_к/хранилищу
+
+# Или используйте переменную окружения
+export OBSIDIAN_VAULT=/путь/_к/хранилищу
+riocloud-reader https://twitter.com/user/status/123
+```
+
+Создаёт структуру папок по дате:
+```
+хранилище/
+├── 2026-02/
+│   ├── youtube/
+│   │   └── dQw4w9WgXcQ_Тестовое_видео.md
+│   └── twitter/
+│       └── abc123_Твит_пользователя.md
+```
+
+### Сессия входа в Twitter
+
+Для лучшего покрытия Twitter/X войдите в систему для сохранения сессии:
+
+```bash
+# Сначала войдите (откроется браузер)
+riocloud-reader login twitter
+
+# Затем используйте Twitter URL — будет использована сессия если доступна
+riocloud-reader https://x.com/user/status/123456
+```
+
+Использует трёхуровневое падение: FxTwitter API → Nitter → Playwright сессия
 
 Создайте файл `.env`:
 
