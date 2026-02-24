@@ -373,6 +373,16 @@ ruff check .
 ruff check --fix .
 ```
 
+## Language
+
+This README is available in:
+- [English](README.md)
+- [中文](README_zh.md)
+- [Español](README_es.md)
+- [日本語](README_ja.md)
+- [한국어](README_ko.md)
+- [Русский](README_ru.md)
+
 ## License
 
 BSD 2-Clause License - see LICENSE file for details.

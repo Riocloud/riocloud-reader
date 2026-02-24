@@ -359,6 +359,16 @@ ruff check --fix .
 
 Licencia BSD 2-Clause - ver archivo LICENSE para detalles.
 
+## Idiomas
+
+Este README está disponible en:
+- [English](README.md)
+- [中文](README_zh.md)
+- [Español](README_es.md)
+- [日本語](README_ja.md)
+- [한국어](README_ko.md)
+- [Русский](README_ru.md)
+
 ## Soporte
 
 - Reportar problemas: https://github.com/Riocloud/riocloud-reader/issues

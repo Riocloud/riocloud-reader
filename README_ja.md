@@ -360,6 +360,16 @@ ruff check --fix .
 
 BSD 2-Clause License - 詳細はLICENSEファイルを参照してください。
 
+## 言語
+
+このREADMEは他の言語でも利用可能です：
+- [English](README.md)
+- [中文](README_zh.md)
+- [Español](README_es.md)
+- [日本語](README_ja.md)
+- [한국어](README_ko.md)
+- [Русский](README_ru.md)
+
 ## サポート
 
 - 問題の報告：https://github.com/Riocloud/riocloud-reader/issues
