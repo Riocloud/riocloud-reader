@@ -4,40 +4,40 @@
 ![Python](https://img.shields.io/pypi/pyversions/riocloud-reader)
 ![License](https://img.shields.io/github/license/Riocloud/riocloud-reader)
 
-Lector de contenido universal para agentes de IA. Obtén, transcribe y digiere contenido de más de 30 plataformas en segundos.
+Lector de contenido universal para agentes de IA. Obtén, transcribe y organiza contenido de más de 30 plataformas en segundos.
 
-## Descripción
+## Descripción general
 
-Riocloud Reader es un potente lector de contenido universal diseñado para agentes de IA y desarrolladores. Puede obtener contenido de varias plataformas en línea, extraer texto y transcripciones, y devolver datos estructurados perfectos para la ingestión de LLM.
+Riocloud Reader es un potente lector de contenido universal diseñado para agentes de IA y desarrolladores. Puede obtener contenido de varias plataformas en línea, extraer texto y transcripciones, y devolver datos estructurados perfectos para ingestion por LLM.
 
-Ya necesites leer tweets, videos de YouTube, publicaciones de Reddit, artículos de noticias o contenido de plataformas chinas como WeChat y Bilibili, Riocloud Reader lo maneja todo a través de una API simple y unificada.
+Ya sea que necesites leer tweets, videos de YouTube, publicaciones de Reddit, artículos de noticias o contenido de plataformas chinas como WeChat y Bilibili, Riocloud Reader lo maneja todo con una API simple y unificada.
 
-## Características Principales
+## Características principales
 
-- **Cero Configuración** - Funciona de inmediato para la mayoría de las plataformas, sin necesidad de claves API
+- **Cero configuración** - Funciona de inmediato para la mayoría de las plataformas, sin necesidad de claves API
 - **Soporte para más de 30 plataformas** - Twitter/X, Reddit, YouTube, WeChat, Bilibili, RSS y más
-- **Salida Multi-Formato** - Devuelve datos estructurados incluyendo título, contenido, autor, marcas de tiempo y metadatos
-- **Múltiples Interfaces** - Herramienta CLI, biblioteca Python, servidor MCP y skill de OpenClaw
+- **Salida multiformato** - Devuelve datos estructurados incluyendo título, contenido, autor, marcas de tiempo y metadatos
+- **Múltiples interfaces** - Herramienta CLI, biblioteca Python, servidor MCP y skill de OpenClaw
 - **Multiplataforma** - Funciona en Linux, macOS y Windows
 
-## Plataformas Soportadas
+## Plataformas compatibles
 
 ### Twitter/X
 - Tweets regulares con texto completo
 - Tweets largos (Twitter Blue)
-- X Articles (contenido largo)
+- Artículos de X (contenido largo)
 - Tweets citados con contenido anidado
-- Hilos de respuestas (hasta 5 mediante fallback de Nitter)
-- Capturas de perfil con biografía y estadísticas
-- Métricas de engagement (likes, retweets, vistas, marcadores)
+- Hilos de respuestas (hasta 5 vía Nitter)
+- Capturas de perfil incluyendo bio y estadísticas
+- Métricas de engagement (me gusta, retweets, vistas, marcadores)
 
 ### Reddit
 - Publicaciones propias con cuerpo markdown completo
-- Publicaciones de enlace con URL y metadatos
-- Mejores comentarios (hasta 15, ordenados por puntuación)
+- Publicaciones de enlaces con URL y metadatos
+- Comentarios principales (hasta 15, ordenados por puntuación)
 - Hilos de respuestas anidados (hasta 3 niveles)
 - URLs de medios (imágenes, galerías, videos)
-- Estadísticas de publicación (puntuación, número de comentarios, proporción de upvotes)
+- Estadísticas de publicación (puntuación, número de comentarios, ratio de votos)
 - Etiquetas de categoría
 
 ### YouTube
@@ -48,14 +48,14 @@ Ya necesites leer tweets, videos de YouTube, publicaciones de Reddit, artículos
   - youtu.be/xxx
   - youtube.com/embed/xxx
 
-### WeChat (Cuentas Oficiales de WeChat)
+### WeChat (Cuentas Oficiales)
 - Artículos de cuentas oficiales
-- Jina Reader como método principal de obtención
-- Fallback de Playwright para páginas con protección contra scraping
+- Jina Reader como método de obtención principal
+- Playwright alternativo para páginas con anti-scraping
 
 ### Xiaohongshu (Libro Rojo Pequeño)
 - Notas y publicaciones
-- URLs de imágenes y medios
+- Imágenes y URLs de medios
 - Playwright con sesión para solicitudes autenticadas
 
 ### Bilibili
@@ -64,39 +64,39 @@ Ya necesites leer tweets, videos de YouTube, publicaciones de Reddit, artículos
 - Soporte para bilibili.com y enlaces cortos b23.tv
 
 ### RSS/Atom
-- Cualquier fuente RSS o Atom estándar
-- Detección automática de URLs de fuentes
+- Cualquier feed RSS o Atom estándar
+- Detección automática de URLs de feed
 
 ### Telegram
 - Mensajes de canales
 - Requiere TG_API_ID y TG_API_HASH de my.telegram.org
 
-### Genérico (Cualquier URL)
-- Cualquier página web a través de Trafilatura
-- Jina Reader como fallback
+### Genérico (cualquier URL)
+- Cualquier página web vía Trafilatura
+- Jina Reader como alternativa
 - Extracción de contenido por mejor esfuerzo
 
 ### NotebookLM (Integración)
 - Subir contenido como fuentes
-- Generar descripción de audio (estilo podcast)
+- Generar Descripción General de Audio (estilo podcast)
 - Requiere autenticación de Google
 
 ## Instalación
 
-### Instalación Básica
+### Instalación básica
 
 ```bash
 pip install riocloud-reader
 ```
 
-### Con Todas las Dependencias
+### Con todas las dependencias
 
 ```bash
 pip install "riocloud-reader[all]"
 playwright install chromium
 ```
 
-### Dependencias Opcionales
+### Dependencias opcionales
 
 ```bash
 # Soporte de navegador (WeChat, Xiaohongshu)
@@ -105,13 +105,13 @@ pip install "riocloud-reader[browser]"
 # Transcripciones de YouTube
 pip install "riocloud-reader[youtube]"
 
-# Soporte de Telegram
+# Soporte para Telegram
 pip install "riocloud-reader[telegram]"
 
 # Integración con NotebookLM
 pip install "riocloud-reader[notebooklm]"
 
-# Parseo de URLs genéricas
+# Parsing de URL genérico
 pip install "riocloud-reader[generic]"
 
 # Desarrollo y pruebas
@@ -120,10 +120,10 @@ pip install "riocloud-reader[dev]"
 
 ## Uso
 
-### Interfaz de Línea de Comandos
+### Interfaz de línea de comandos
 
 ```bash
-# Leer una URL única
+# Leer una URL individual
 riocloud-reader https://twitter.com/user/status/123456
 riocloud-reader https://youtube.com/watch?v=dQw4w9WgXcQ
 riocloud-reader https://reddit.com/r/python/comments/abc123
@@ -148,12 +148,12 @@ async def main():
     # Inicializar lector
     reader = Reader()
     
-    # Leer una URL única
+    # Leer una URL individual
     content = await reader.read("https://twitter.com/user/status/123456")
     print(f"Título: {content.title}")
     print(f"Contenido: {content.content[:500]}")
     
-    # Leer múltiples URLs en lote
+    # Lectura por lotes de múltiples URLs
     results = await reader.read_batch([
         "https://twitter.com/user/status/1",
         "https://reddit.com/r/python/comments/abc",
@@ -172,7 +172,7 @@ asyncio.run(main())
 ```python
 from skills.reader import run
 
-# Leer contenido directamente en memoria del agente
+# Leer contenido directamente en la memoria del agente
 result = run("Mira este tweet: https://x.com/elonmusk/status/123456")
 result = run("Obtén la transcripción de: https://youtube.com/watch?v=dQw4w9WgXcQ")
 ```
@@ -185,7 +185,7 @@ Iniciar el servidor MCP:
 python -m riocloud_reader.mcp
 ```
 
-Configurar en tu configuración de Claude Desktop (claude_desktop_config.json):
+Configurar en tu Claude Desktop (claude_desktop_config.json):
 
 ```json
 {
@@ -200,7 +200,7 @@ Configurar en tu configuración de Claude Desktop (claude_desktop_config.json):
 
 ## Configuración
 
-### Variables de Entorno
+### Variables de entorno
 
 | Variable | Requiere | Descripción |
 |----------|----------|-------------|
@@ -210,9 +210,9 @@ Configurar en tu configuración de Claude Desktop (claude_desktop_config.json):
 | FIRECRAWL_API_KEY | Firecrawl | Opcional, para contenido de pago |
 | DEEPREEDER_MEMORY_PATH | Almacenamiento | Directorio para guardar contenido |
 
-### Archivo de Configuración
+### Archivo de configuración
 
-Crear archivo `.env`:
+Crear un archivo `.env`:
 
 ```bash
 cp .env.example .env
@@ -223,19 +223,19 @@ cp .env.example .env
 
 ```
 riocloud_reader/
-├── parsers/                  # Analizadores específicos por plataforma
-│   ├── base.py              # Clase base del analizador y utilidades
-│   ├── twitter.py           # Analizador de Twitter/X (FxTwitter + Nitter)
-│   ├── reddit.py            # Analizador de Reddit (.json API)
-│   ├── youtube.py           # Analizador de transcripciones de YouTube
-│   ├── wechat.py            # Analizador de artículos de WeChat
-│   ├── xhs.py               # Analizador de Xiaohongshu
-│   ├── bilibili.py          # Analizador de Bilibili
-│   ├── rss.py               # Analizador de feeds RSS/Atom
-│   ├── telegram.py          # Analizador de canales de Telegram
-│   └── generic.py           # Analizador de URLs genéricas (Trafilatura)
+├── parsers/                  # Parsers específicos por plataforma
+│   ├── base.py              # Clase base del parser y utilidades
+│   ├── twitter.py           # Parser de Twitter/X (FxTwitter + Nitter)
+│   ├── reddit.py            # Parser de Reddit (.json API)
+│   ├── youtube.py           # Parser de transcripciones de YouTube
+│   ├── wechat.py            # Parser de artículos de WeChat
+│   ├── xhs.py               # Parser de Xiaohongshu
+│   ├── bilibili.py          # Parser de Bilibili
+│   ├── rss.py               # Parser de feeds RSS/Atom
+│   ├── telegram.py          # Parser de canales de Telegram
+│   └── generic.py           # Parser de URL genérico (Trafilatura)
 ├── core/                     # Funcionalidad principal
-│   ├── router.py            # Enrutamiento de URL al analizador apropiado
+│   ├── router.py            # Enrutamiento de URL al parser apropiado
 │   ├── storage.py           # Utilidades de E/S de archivos
 │   └── config.py            # Gestión de configuración
 ├── skills/                   # Integración de skills de OpenClaw
@@ -251,7 +251,7 @@ riocloud_reader/
 
 ## Desarrollo
 
-### Configurar Entorno de Desarrollo
+### Configurar entorno de desarrollo
 
 ```bash
 # Clonar repositorio
@@ -266,7 +266,7 @@ pip install -e ".[all]"
 playwright install chromium
 ```
 
-### Ejecutar Pruebas
+### Ejecutar pruebas
 
 ```bash
 # Ejecutar todas las pruebas
@@ -279,7 +279,7 @@ pytest tests/test_parsers.py
 pytest -v
 ```
 
-### Calidad de Código
+### Calidad del código
 
 ```formatear código con Black
 black .
@@ -293,14 +293,14 @@ ruff check --fix .
 
 ## Licencia
 
-Licencia MIT - consulta el archivo LICENSE.
+Licencia BSD 2-Clause - ver archivo LICENSE para detalles.
 
 ## Soporte
 
 - Reportar problemas: https://github.com/Riocloud/riocloud-reader/issues
 - Documentación: https://github.com/Riocloud/riocloud-reader#readme
 
-## Proyectos Relacionados
+## Proyectos relacionados
 
 - [x-reader](https://github.com/runesleo/x-reader) - Lector de contenido universal original
 - [OpenClaw-DeepReeder](https://github.com/astonysh/OpenClaw-DeepReeder) - Lector incorporado de OpenClaw
