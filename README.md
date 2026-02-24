@@ -1,8 +1,8 @@
 # Riocloud Reader
 
-![GitHub Release](https://img.shields.io/github/v/release/Riocloud/riocloud-reader)
-![Python Version](https://img.shields.io/pypi/pyversions/riocloud-reader)
-![License](https://img.shields.io/badge/License-MIT-green)
+![GitHub](https://img.shields.io/github/stars/Riocloud/riocloud-reader)
+![License](https://img.shields.io/github/license/Riocloud/riocloud-reader)
+![Python](https://img.shields.io/pypi/pyversions/3.10+-brightgreen)
 
 Universal content reader — fetch, transcribe, and digest content from 30+ platforms. Combines the best of [x-reader](https://github.com/runesleo/x-reader) and [OpenClaw-DeepReeder](https://github.com/astonysh/OpenClaw-DeepReeder).
 
