@@ -383,6 +383,22 @@ This README is available in:
 - [한국어](README_ko.md)
 - [Русский](README_ru.md)
 
+## Security Updates (v1.1.0)
+
+### Path Traversal Protection
+- Added `validate_safe_path()` function to prevent directory traversal attacks
+- Validates `--output`, `--inbox`, and `--obsidian` CLI arguments
+- Restricts file operations to safe directories (~, ., ./output, /tmp)
+
+### DoS Prevention
+- Added `max_response_size` (10MB) and `max_content_length` (2MB) limits
+- Response size checks in Reddit and Twitter parsers
+- Prevents memory exhaustion from unbounded HTTP responses
+
+### Input Validation
+- Validates GROQ_API_KEY format (must start with `gsk_`)
+- Consistent title truncation across all parsers
+
 ## License
 
 BSD 2-Clause License - see LICENSE file for details.

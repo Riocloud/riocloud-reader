@@ -1,0 +1,2 @@
+[console_scripts]
+riocloud-reader = riocloud_reader.cli:main

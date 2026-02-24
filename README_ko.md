@@ -370,6 +370,22 @@ BSD 2-Clause License - 자세한 내용은 LICENSE 파일을 참조하세요.
 - [한국어](README_ko.md)
 - [Русский](README_ru.md)
 
+## 보안 업데이트 (v1.1.0)
+
+### 경로 탐색 보호
+- 디렉터리 탐색 공격을 방지하는 `validate_safe_path()` 함수 추가
+- `--output`, `--inbox`, `--obsidian` CLI 인자 검증
+- 안전한 디렉터리(~, ., ./output, /tmp)로 파일 작업 제한
+
+### DoS 방지
+- `max_response_size`(10MB) 및 `max_content_length`(2MB) 제한 추가
+- Reddit, Twitter 파서에서 응답 크기 검사
+- 무한 HTTP 응답으로 인한 메모리 고갈 방지
+
+### 입력 검증
+- GROQ_API_KEY 형식 검증(`gsk_`로 시작해야 함)
+- 모든 파서에서 제목 자르기 일관성 유지
+
 ## 지원
 
 - 문제 보고: https://github.com/Riocloud/riocloud-reader/issues

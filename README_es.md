@@ -369,6 +369,22 @@ Este README está disponible en:
 - [한국어](README_ko.md)
 - [Русский](README_ru.md)
 
+## Actualizaciones de Seguridad (v1.1.0)
+
+### Protección contra Path Traversal
+- Añadida función `validate_safe_path()` para prevenir ataques de directory traversal
+- Valida argumentos CLI `--output`, `--inbox` y `--obsidian`
+- Restringe operaciones de archivo a directorios seguros (~, ., ./output, /tmp)
+
+### Prevención de DoS
+- Añadidos límites `max_response_size` (10MB) y `max_content_length` (2MB)
+- Verificaciones de tamaño de respuesta en Reddit y Twitter parsers
+- Previene agotamiento de memoria por respuestas HTTP ilimitadas
+
+### Validación de Entrada
+- Valida formato de GROQ_API_KEY (debe comenzar con `gsk_`)
+- Truncación de título consistente en todos los parsers
+
 ## Soporte
 
 - Reportar problemas: https://github.com/Riocloud/riocloud-reader/issues
