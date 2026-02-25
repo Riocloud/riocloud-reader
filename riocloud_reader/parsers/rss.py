@@ -27,7 +27,8 @@ class RSSParser(BaseParser):
     async def parse(self, url: str) -> ParseResult:
         """Parse an RSS feed URL."""
         try:
-            feed = feedparser.parse(url)
+            # Use safe parsing: disable relative URI resolution for security
+        feed = feedparser.parse(url, resolve_relative_uris=False)
             
             if not feed.entries:
                 return ParseResult.failure(url, "No entries in feed")
