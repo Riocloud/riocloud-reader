@@ -142,7 +142,9 @@ class YouTubeParser(BaseParser):
         try:
             from youtube_transcript_api import YouTubeTranscriptApi
             
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            # Create instance and list transcripts
+            api = YouTubeTranscriptApi()
+            transcript_list = api.list(video_id)
             
             # Try preferred languages
             transcript = None
@@ -168,7 +170,7 @@ class YouTubeParser(BaseParser):
             
             if transcript:
                 entries = transcript.fetch()
-                lines = [e["text"] for e in entries]
+                lines = [e.text for e in entries]
                 return self._format_transcript(lines), lang_code
             
         except ImportError:
