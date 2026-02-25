@@ -12,7 +12,7 @@ import logging
 from urllib.parse import urlparse
 from typing import Optional, List
 
-from .schema import UnifiedContent, UnifiedInbox
+from .schema import UnifiedContent, UnifiedInbox, SourceType
 from .parsers import get_parser
 from .utils.url_validator import validate_url
 
@@ -96,9 +96,15 @@ class Reader:
             # Parse the URL
             result = await parser.parse(url)
             
+            # Convert platform string to SourceType enum
+            try:
+                source_type = SourceType(platform)
+            except ValueError:
+                source_type = SourceType.GENERIC
+            
             # Convert ParseResult to UnifiedContent
             content = UnifiedContent(
-                source_type=platform,
+                source_type=source_type,
                 source_name=result.author or urlparse(url).netloc,
                 title=result.title,
                 content=result.content,
