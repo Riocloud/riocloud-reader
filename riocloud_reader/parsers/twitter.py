@@ -175,8 +175,11 @@ Source: {url}
         text = tweet.get("text", "")
         created_at = tweet.get("created_at", "")
         
-        # Stats
-        stats = f"❤️ {tweet.get('likes', 0):,} · 🔁 {tweet.get('retweets', 0):,} · 👁️ {tweet.get('views', 0):,}"
+        # Stats - handle None values
+        likes = tweet.get('likes') or 0
+        retweets = tweet.get('retweets') or 0
+        views = tweet.get('views') or 0
+        stats = f"❤️ {likes:,} · 🔁 {retweets:,} · 👁️ {views:,}"
         
         content_parts = [f"**@{screen_name}** ({name})\n"]
         content_parts.append(f"🕐 {created_at}\n")
